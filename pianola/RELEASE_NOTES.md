@@ -5,7 +5,7 @@
 Terminal öffnen, diese eine Zeile einfügen, Enter:
 
 ```
-a=$([ "$(uname -m)" = arm64 ] && echo AppleSilicon || echo Intel); curl -fL -o /tmp/Pianola.zip "https://github.com/VefaCoder/Project-Claude-Cheat/releases/latest/download/Pianola-Mac-$a.zip" && rm -rf /Applications/Pianola.app && ditto -x -k /tmp/Pianola.zip /Applications && open /Applications/Pianola.app
+a=$([ "$(sysctl -in hw.optional.arm64)" = 1 ] && echo AppleSilicon || echo Intel); curl -fL -o /tmp/Pianola.zip "https://github.com/VefaCoder/Project-Claude-Cheat/releases/latest/download/Pianola-Mac-$a.zip" && rm -rf /Applications/Pianola.app && ditto -x -k /tmp/Pianola.zip /Applications && open /Applications/Pianola.app
 ```
 
 ### Oder per Hand

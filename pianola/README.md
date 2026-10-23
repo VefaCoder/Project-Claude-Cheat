@@ -12,7 +12,7 @@ Ein Klavier für den Mac, das von einer KI programmiert wird. Die Noten fallen a
 Siehe [Release-Seite](https://github.com/VefaCoder/Project-Claude-Cheat/releases/latest). Schnellster Weg, im Terminal:
 
 ```
-a=$([ "$(uname -m)" = arm64 ] && echo AppleSilicon || echo Intel); curl -fL -o /tmp/Pianola.zip "https://github.com/VefaCoder/Project-Claude-Cheat/releases/latest/download/Pianola-Mac-$a.zip" && rm -rf /Applications/Pianola.app && ditto -x -k /tmp/Pianola.zip /Applications && open /Applications/Pianola.app
+a=$([ "$(sysctl -in hw.optional.arm64)" = 1 ] && echo AppleSilicon || echo Intel); curl -fL -o /tmp/Pianola.zip "https://github.com/VefaCoder/Project-Claude-Cheat/releases/latest/download/Pianola-Mac-$a.zip" && rm -rf /Applications/Pianola.app && ditto -x -k /tmp/Pianola.zip /Applications && open /Applications/Pianola.app
 ```
 
 ## So entsteht ein Stück
