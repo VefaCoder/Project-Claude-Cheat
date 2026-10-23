@@ -266,7 +266,16 @@ function runSmokeTest(w) {
           } catch (e) { exportError = String(e && e.message || e); await window.pianola.exportAbort(h.id) }
           exportMs = performance.now() - t
         }
-        return { plans, exportMs, exportError, frames, notes: d.song.notes.length, status: document.getElementById('statusText').textContent }
+        // pure drawing speed at 4K, without the encoder
+        const c = new OffscreenCanvas(3840, 2160)
+        const cx = c.getContext('2d', { alpha: false })
+        const r = new d.stage.renderer.constructor()
+        r.setSong(d.song)
+        const tr = performance.now()
+        for (let i = 0; i < 120; i++) r.draw(cx, 3840, 2160, 5 + i / 60, { fallSeconds: 2.6 })
+        cx.getImageData(0, 0, 1, 1)
+        const renderMsPerFrame = (performance.now() - tr) / 120
+        return { plans, exportMs, exportError, frames, renderMsPerFrame, notes: d.song.notes.length, status: document.getElementById('statusText').textContent }
       })()`)
       out('smoke.json', JSON.stringify({ ok: true, loadMs, ...result }, null, 1))
       app.exit(0)

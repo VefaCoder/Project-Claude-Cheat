@@ -88,13 +88,26 @@ jobs:
           app="$(ls -d release/mac-arm64/Pianola.app)"
           "$app/Contents/MacOS/Pianola" --smoke-test="$PWD/smoke" || echo "::warning::Smoke-Test beendet mit Fehler"
           cat smoke/smoke.json || true
-          if [ -f smoke/smoke.mov ]; then ls -lh smoke/smoke.mov; swift scripts/inspect_video.swift smoke/smoke.mov; fi
+          if [ -f smoke/smoke.mov ]; then ls -lh smoke/smoke.mov; swift scripts/inspect_video.swift smoke/smoke.mov smoke/frame.png; fi
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: smoke-test
           path: pianola/smoke
           retention-days: 7
+      - name: Testbilder in Branch ci-smoke ablegen
+        if: always() && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          dir="$RUNNER_TEMP/ci-smoke"
+          mkdir -p "$dir"
+          cp smoke/screenshot.png smoke/frame.png smoke/smoke.json "$dir"/ 2>/dev/null || true
+          cd "$dir"
+          git init -q -b ci-smoke
+          git add -A
+          git -c user.name=ci -c user.email=ci@localhost commit -q -m "Smoke-Test $GITHUB_SHA"
+          git push -q -f "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" ci-smoke
       - name: Release veröffentlichen
         env:
           GH_TOKEN: ${{ github.token }}

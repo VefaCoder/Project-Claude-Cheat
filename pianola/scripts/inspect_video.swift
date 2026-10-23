@@ -1,6 +1,7 @@
 // CI check: proves that AVFoundation (QuickTime) can open and decode an exported video.
 // Usage: swift scripts/inspect_video.swift <file.mov>
 import AVFoundation
+import ImageIO
 
 func fourCC(_ v: FourCharCode) -> String {
   String(bytes: [UInt8((v >> 24) & 255), UInt8((v >> 16) & 255), UInt8((v >> 8) & 255), UInt8(v & 255)], encoding: .ascii) ?? "?"
@@ -32,6 +33,13 @@ Task {
     gen.requestedTimeToleranceAfter = .zero
     let (image, _) = try await gen.image(at: CMTime(seconds: min(4, duration.seconds / 2), preferredTimescale: 600))
     print("decoded frame \(image.width)x\(image.height)")
+    if CommandLine.arguments.count > 2 {
+      let out = URL(fileURLWithPath: CommandLine.arguments[2]) as CFURL
+      if let dest = CGImageDestinationCreateWithURL(out, "public.png" as CFString, 1, nil) {
+        CGImageDestinationAddImage(dest, image, nil)
+        CGImageDestinationFinalize(dest)
+      }
+    }
   } catch {
     print("ERROR \(error)")
     failed = true
