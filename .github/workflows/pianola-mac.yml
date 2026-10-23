@@ -114,4 +114,12 @@ jobs:
         run: |
           gh release view pianola >/dev/null 2>&1 || gh release create pianola --title "Pianola für macOS" --notes-file RELEASE_NOTES.md --target "$GITHUB_SHA" --latest
           gh release edit pianola --notes-file RELEASE_NOTES.md
-          gh release upload pianola Pianola-Mac-*.zip --clobber
+          # upload under a temporary name first, then swap: the download link is gone for a second, not for minutes
+          for f in Pianola-Mac-*.zip; do
+            tmp="${f%.zip}.neu.zip"
+            cp "$f" "$tmp"
+            gh release upload pianola "$tmp" --clobber
+            gh release delete-asset pianola "$f" -y 2>/dev/null || true
+            id="$(gh api "repos/$GITHUB_REPOSITORY/releases/tags/pianola" --jq ".assets[] | select(.name==\"$tmp\") | .id")"
+            gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/assets/$id" -f name="$f" > /dev/null
+          done
