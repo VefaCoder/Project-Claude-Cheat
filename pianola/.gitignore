@@ -1,0 +1,7 @@
+node_modules/
+dist/
+release/
+smoke/
+.cache/
+assets/piano/
+*.log

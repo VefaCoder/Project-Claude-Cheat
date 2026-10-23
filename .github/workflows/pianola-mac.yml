@@ -1,0 +1,104 @@
+name: Pianola Mac-App
+
+on:
+  push:
+    branches: [main, 'claude/**']
+    paths: ['pianola/**', '.github/workflows/pianola-mac.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pianola-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  samples:
+    name: Klaviersamples aufbereiten
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - id: cache
+        uses: actions/cache@v4
+        with:
+          path: pianola/assets/piano
+          key: piano-pack-v1-${{ hashFiles('pianola/scripts/build_samples.py', 'pianola/scripts/fetch_salamander.sh') }}
+      - if: steps.cache.outputs.cache-hit != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - if: steps.cache.outputs.cache-hit != 'true'
+        name: Salamander Grand Piano (Original, 48 kHz / 24 Bit) laden und aufbereiten
+        run: |
+          pip install --quiet numpy soundfile scipy
+          if bash pianola/scripts/fetch_salamander.sh "$RUNNER_TEMP/salamander"; then
+            python pianola/scripts/build_samples.py --source salamander --dir "$RUNNER_TEMP/salamander" --out pianola/assets/piano
+          else
+            echo "::warning::Originale nicht erreichbar, nutze OGG-Kopien von npm"
+            python pianola/scripts/build_samples.py --source dev-ogg --out pianola/assets/piano
+          fi
+          du -sh pianola/assets/piano
+          grep '"source"' pianola/assets/piano/index.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: piano
+          path: pianola/assets/piano
+          retention-days: 3
+
+  mac:
+    name: Mac-App bauen und testen
+    needs: samples
+    runs-on: macos-15
+    defaults:
+      run:
+        working-directory: pianola
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: pianola/package-lock.json
+      - uses: actions/download-artifact@v4
+        with:
+          name: piano
+          path: pianola/assets/piano
+      - run: npm ci
+      - name: Tests
+        run: npm test && npm run typecheck
+      - run: node build.mjs --prod
+      - name: App paketieren (Apple Silicon und Intel)
+        run: npx electron-builder --mac dir --arm64 --x64 --publish never
+      - name: Signieren (ad hoc) und zippen
+        run: |
+          set -e
+          for app in release/*/Pianola.app; do
+            codesign --force --deep --sign - "$app"
+            codesign --verify --deep --strict "$app"
+            arch="$(lipo -archs "$app/Contents/MacOS/Pianola")"
+            case "$arch" in arm64) name=AppleSilicon ;; x86_64) name=Intel ;; *) name="$arch" ;; esac
+            ditto -c -k --sequesterRsrc --keepParent "$app" "Pianola-Mac-$name.zip"
+            echo "$app -> Pianola-Mac-$name.zip ($arch)"
+          done
+          ls -lh Pianola-Mac-*.zip
+      - name: Smoke-Test (App starten, Flügel laden, 4K-Export)
+        run: |
+          mkdir -p smoke
+          app="$(ls -d release/mac-arm64/Pianola.app)"
+          "$app/Contents/MacOS/Pianola" --smoke-test="$PWD/smoke" || echo "::warning::Smoke-Test beendet mit Fehler"
+          cat smoke/smoke.json || true
+          if [ -f smoke/smoke.mov ]; then ls -lh smoke/smoke.mov; swift scripts/inspect_video.swift smoke/smoke.mov; fi
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: smoke-test
+          path: pianola/smoke
+          retention-days: 7
+      - name: Release veröffentlichen
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view pianola >/dev/null 2>&1 || gh release create pianola --title "Pianola für macOS" --notes-file RELEASE_NOTES.md --target "$GITHUB_SHA" --latest
+          gh release edit pianola --notes-file RELEASE_NOTES.md
+          gh release upload pianola Pianola-Mac-*.zip --clobber

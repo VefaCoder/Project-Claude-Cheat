@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' blob: data:; font-src 'self' data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pianola</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="titlebar">
+      <div class="brand"><span id="logo"></span><span>Pianola</span></div>
+      <div class="song-meta"><span id="songTitle">Ohne Titel</span><span id="songComposer"></span></div>
+      <div class="actions">
+        <button class="btn ghost" id="btnPrompt" title="Song von einer KI programmieren lassen"></button>
+        <button class="btn primary" id="btnExport" title="Video exportieren (⌘E)"></button>
+      </div>
+    </header>
+
+    <main id="main">
+      <section class="editor-pane" id="editorPane">
+        <div class="pane-head">
+          <div class="pane-title">PianoScript</div>
+          <div class="tools">
+            <div class="menu-wrap">
+              <button class="btn small ghost" id="btnExamples"></button>
+              <div class="menu" id="examplesMenu" hidden></div>
+            </div>
+            <button class="btn small icon ghost" id="btnOpen" title="Öffnen (⌘O)"></button>
+            <button class="btn small icon ghost" id="btnSave" title="Sichern (⌘S)"></button>
+            <button class="btn small run" id="btnRun" title="Ausführen und von vorne abspielen (⌘↵)"></button>
+          </div>
+        </div>
+        <div id="editor"></div>
+        <div class="problems" id="problems" hidden>
+          <div class="problems-head">
+            <span id="problemsTitle"></span>
+            <button class="btn tiny ghost" id="btnFixPrompt" title="Fehlermeldungen als Korrektur-Auftrag für die KI kopieren"></button>
+          </div>
+          <ul id="problemsList"></ul>
+        </div>
+        <footer class="status" id="status"><span class="dot"></span><span id="statusText">Bereit</span></footer>
+      </section>
+
+      <div class="splitter" id="splitter"></div>
+
+      <section class="stage-pane">
+        <div class="transport">
+          <button class="tbtn" id="btnRestart" title="Zum Anfang"></button>
+          <button class="tbtn play" id="btnPlay" title="Abspielen / Pause (Leertaste)"></button>
+          <span class="time" id="tNow">0:00</span>
+          <input type="range" class="seek" id="seek" min="0" max="1000" value="0" step="1">
+          <span class="time dim" id="tTotal">0:00</span>
+          <div class="knobs">
+            <label class="knob" title="Fallgeschwindigkeit der Noten"><span class="ki" id="icoSpeed"></span><input type="range" id="zoom" min="1.2" max="6" step="0.1" value="2.6"></label>
+            <label class="knob" title="Hall (Konzertsaal)"><span class="ki" id="icoHall"></span><input type="range" id="reverb" min="0" max="1" step="0.01" value="0.35"></label>
+            <label class="knob" title="Lautstärke"><span class="ki" id="icoVol"></span><input type="range" id="volume" min="0" max="1" step="0.01" value="0.9"></label>
+          </div>
+        </div>
+        <div class="stage">
+          <canvas id="stage"></canvas>
+          <div class="loading" id="loading">
+            <div class="loading-card">
+              <div class="loading-title">Flügel wird geladen</div>
+              <div class="loading-sub" id="loadingSub">Yamaha C5 · 88 Tasten · 8 Anschlagstufen</div>
+              <div class="pbar"><i id="loadingBar"></i></div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="dlgPrompt" class="sheet">
+    <button class="close-x" data-close></button>
+    <h2><span class="h-ico" id="icoPrompt"></span>Song von einer KI programmieren lassen</h2>
+    <ol class="steps">
+      <li><b>Stück eintragen</b> und den Prompt kopieren.</li>
+      <li>In <b>ChatGPT, Claude oder Gemini</b> einfügen und abschicken.</li>
+      <li>Die komplette Antwort kopieren und hier mit <b>„Antwort einfügen“</b> übernehmen.</li>
+    </ol>
+    <input type="text" class="input" id="pieceInput" placeholder="z. B. „Clair de Lune“ von Debussy, komplett" autocomplete="off">
+    <div class="row">
+      <button class="btn primary" id="btnCopyPrompt"></button>
+      <button class="btn ghost" id="btnPasteAnswer"></button>
+    </div>
+    <p class="hint">Tipp: Je bekannter das Stück, desto genauer kennt die KI die Noten. Meldet Pianola danach Probleme, schick der KI einfach den Korrektur-Auftrag aus der Fehlerliste.</p>
+    <details>
+      <summary>Sprachreferenz PianoScript</summary>
+      <pre id="langRef"></pre>
+    </details>
+  </dialog>
+
+  <dialog id="dlgExport" class="sheet">
+    <button class="close-x" data-close></button>
+    <h2><span class="h-ico" id="icoExport"></span>Video exportieren</h2>
+    <div class="field">
+      <label>Auflösung</label>
+      <div class="seg" data-name="res">
+        <button type="button" value="3840x2160" class="on">4K Querformat</button>
+        <button type="button" value="2160x3840">4K Hochformat</button>
+        <button type="button" value="1920x1080">Full HD</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Bildrate</label>
+      <div class="seg" data-name="fps">
+        <button type="button" value="60" class="on">60 fps</button>
+        <button type="button" value="30">30 fps</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>Format</label>
+      <div class="seg" data-name="format">
+        <button type="button" value="mov" class="on">MOV · Ton verlustfrei</button>
+        <button type="button" value="mp4">MP4 · überall abspielbar</button>
+      </div>
+    </div>
+    <label class="check"><input type="checkbox" id="optTitle" checked><span>Titel und Komponist am Anfang einblenden</span></label>
+    <div class="summary" id="exportSummary"></div>
+    <div class="progress" id="exportProgress" hidden>
+      <div class="pbar big"><i id="exportBar"></i></div>
+      <div class="ptext"><span id="exportPhase"></span><span id="exportEta"></span></div>
+    </div>
+    <div class="row end">
+      <button class="btn ghost" id="btnExportCancel">Abbrechen</button>
+      <button class="btn primary" id="btnExportStart">Exportieren …</button>
+    </div>
+  </dialog>
+
+  <div class="toast" id="toast" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

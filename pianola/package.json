@@ -1,0 +1,53 @@
+{
+  "name": "pianola",
+  "productName": "Pianola",
+  "version": "1.0.0",
+  "description": "KI-programmierbares Klavier mit Falling-Notes-Ansicht und 4K-Videoexport",
+  "main": "electron/main.cjs",
+  "private": true,
+  "license": "MIT",
+  "author": "Pianola",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "node build.mjs && electron .",
+    "typecheck": "tsc --noEmit -p .",
+    "test": "node --experimental-strip-types --no-warnings --test test/*.test.ts",
+    "samples:dev": "python3 scripts/build_samples.py --source dev-ogg --out assets/piano",
+    "dist:mac": "node build.mjs && electron-builder --mac --publish never"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "6.20.3",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/lang-javascript": "6.2.5",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/search": "6.7.2",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.14",
+    "@lezer/highlight": "1.2.5",
+    "acorn": "8.19.0",
+    "electron": "44.7.0",
+    "electron-builder": "26.17.0",
+    "esbuild": "0.28.2",
+    "mediabunny": "1.61.3",
+    "typescript": "6.0.2"
+  },
+  "build": {
+    "appId": "app.pianola.mac",
+    "productName": "Pianola",
+    "copyright": "Klaviersamples: Salamander Grand Piano V3 von Alexander Holm (CC BY 3.0)",
+    "directories": { "output": "release", "buildResources": "assets/build" },
+    "files": ["electron/**", "dist/**", "package.json"],
+    "extraResources": [{ "from": "assets/piano", "to": "piano" }],
+    "asar": true,
+    "mac": {
+      "category": "public.app-category.music",
+      "target": [{ "target": "zip", "arch": ["arm64", "x64"] }],
+      "icon": "assets/build/icon.png",
+      "identity": null,
+      "hardenedRuntime": false,
+      "gatekeeperAssess": false,
+      "darkModeSupport": true,
+      "minimumSystemVersion": "12.0"
+    }
+  }
+}
