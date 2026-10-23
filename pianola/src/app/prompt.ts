@@ -4,9 +4,10 @@ export const LANGUAGE_GUIDE = `PianoScript ist normales JavaScript mit ein paar 
 
 GRUNDGERÜST
 title("Titel"); composer("Komponist")
-tempo(72)            // Viertelnoten pro Minute
+tempo(72)            // immer VIERTELnoten pro Minute (6/8 mit punktierter Viertel = 60 → tempo(90))
 meter(3, 4)          // Taktart, Standard ist 4/4
-pickup("/8")         // nur bei Auftakt: Länge des Auftakts
+pickup("/8")         // nur bei Auftakt: dessen Länge. Jede Stimme beginnt dann mit genau
+                     // dieser Länge (notfalls Pause), danach kommt der erste Taktstrich.
 humanize(0.6)        // leichte menschliche Ungenauigkeit, 0 = exakt
 const rh = voice("Rechte Hand")
 const lh = voice("Linke Hand")
@@ -18,7 +19,7 @@ Tonhöhe:   Buchstabe A–G, optional # oder b, dann Oktave. Mittleres C = C4.
            Beispiele: C4 F#3 Bb5 Eb2. Tiefste Taste A0, höchste C8.
            Englische Namen: H heißt B, B heißt Bb.
 Dauer:     /1 ganze, /2 halbe, /4 Viertel, /8 Achtel, /16, /32, /64
-           punktiert: /4. /8.   Triolen: /12 Achteltriole, /6 Vierteltriole, /24 Sechzehnteltriole
+           punktiert: /2. /4. /8.   Triolen: /12 Achteltriole, /6 Vierteltriole, /24 Sechzehnteltriole
            Die Dauer gilt weiter, bis eine neue kommt: "C4/8 D4 E4" sind drei Achtel.
 Pause:     r/4  r/8  r/16 …
 Akkord:    [C4 E4 G4]/2      gebrochen (arpeggiert): [C3 G3 E4]/2&
@@ -36,7 +37,9 @@ WEITERE FUNKTIONEN
 rh.note("C4", "/8", {vel: 90})    rh.chord(["C4","E4","G4"], "/2")    rh.rest("/4")
 rh.at(bar(17))       setzt die Stimme an den Anfang von Takt 17
 transpose("C4 E4 G4", 2)   verschiebt Notentext um Halbtöne
-voice("Name", {color: "#ff8800"})   eigene Farbe für die Stimme
+voice("Name", {hand: "right", color: "#ff8800"})   Hand und eigene Farbe festlegen
+Spielt eine Hand gleichzeitig verschieden lange Töne (z. B. Melodie über Begleitung),
+lege dafür eine weitere Stimme an: voice("Rechts Oberstimme", {hand: "right"}).
 Variablen, Funktionen, Schleifen und Template-Strings sind ausdrücklich erlaubt.`
 
 const RULES = `REGELN

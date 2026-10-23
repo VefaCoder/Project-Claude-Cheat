@@ -4,7 +4,7 @@ import {
   Output, MovOutputFormat, Mp4OutputFormat, CanvasSource, AudioBufferSource, canEncodeVideo, canEncodeAudio,
   type Target,
 } from 'mediabunny'
-import { PianoRenderer } from '../render/renderer.ts'
+import { PianoRenderer, autoRange, visibleSeconds } from '../render/renderer.ts'
 import { renderSongAudio, masterBuffer, SAMPLE_RATE } from '../audio/engine.ts'
 import type { PianoPack } from '../audio/samples.ts'
 import type { Song } from '../song/song.ts'
@@ -48,17 +48,19 @@ export async function planExport(s: Pick<ExportSettings, 'width' | 'height' | 'f
   return null
 }
 
-export function exportTiming(song: Song, fallSeconds: number) {
-  const preroll = fallSeconds + 0.8
+/** Portrait videos zoom into the keys the song uses; the pre-roll lets the first notes fall in from the top. */
+export function exportTiming(song: Song, s: Pick<ExportSettings, 'width' | 'height' | 'fallSeconds'>) {
+  const range = s.height > s.width ? autoRange(song) : undefined
+  const preroll = visibleSeconds(s.width, s.height, s.fallSeconds, range) + 0.8
   const tail = 3.5
-  return { preroll, tail, total: preroll + song.duration + tail }
+  return { preroll, tail, total: preroll + song.duration + tail, range }
 }
 
 export async function exportVideo(
   song: Song, pack: PianoPack, s: ExportSettings, plan: ExportPlan, target: Target,
   onProgress: (p: ExportProgress) => void, signal: AbortSignal,
 ): Promise<void> {
-  const { preroll, tail, total } = exportTiming(song, s.fallSeconds)
+  const { preroll, tail, total, range } = exportTiming(song, s)
   const check = () => { if (signal.aborted) throw new DOMException('Export abgebrochen', 'AbortError') }
 
   onProgress({ phase: 'audio', fraction: 0 })
@@ -116,6 +118,7 @@ export async function exportVideo(
       if (vt + 1 > audioAdded / SAMPLE_RATE) await addAudioUntil(vt + 2)
       renderer.draw(ctx, s.width, s.height, vt - preroll, {
         fallSeconds: s.fallSeconds,
+        range,
         title: s.showTitle && song.title ? { text: song.title, sub: song.composer, alpha: titleAlpha(vt) } : null,
       })
       await video.add(vt, 1 / s.fps)

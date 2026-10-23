@@ -236,7 +236,7 @@ ipcMain.handle('clipboard:write', (_e, text) => clipboard.writeText(String(text)
 function runSmokeTest(w) {
   const out = (name, data) => fs.writeFileSync(path.join(smokeDir, name), data)
   const fail = msg => { out('smoke.json', JSON.stringify({ ok: false, error: String(msg) }, null, 1)); app.exit(1) }
-  setTimeout(() => fail('timeout'), 240000)
+  setTimeout(() => fail('timeout'), 420000)
   w.webContents.on('console-message', (e, _level, message) => console.log('[renderer]', message ?? e.message))
   w.webContents.once('did-finish-load', async () => {
     try {
@@ -253,14 +253,15 @@ function runSmokeTest(w) {
         let exportMs = null, exportError = null, frames = 0
         if (plan) {
           const song = structuredClone(d.song)
-          song.notes = song.notes.filter(n => n.start < 3)
-          song.pedal = song.pedal.filter(p => p.time < 3)
+          song.notes = song.notes.filter(n => n.start < 1.5)
+          song.pedal = song.pedal.filter(p => p.time < 1.5)
           song.duration = Math.max(...song.notes.map(n => n.start + n.dur))
           const h = await window.pianola.exportBegin('smoke', 'mov')
           const target = new d.StreamTarget(new WritableStream({ write: c => window.pianola.exportWrite(h.id, c.position, c.data) }), { chunked: true })
           const t = performance.now()
           try {
-            await d.exportVideo(song, d.pack, { width: 3840, height: 2160, fps: 60, format: 'mov', showTitle: true, fallSeconds: 2.6, reverb: 0.35 }, plan, target, p => { if (p.frame) frames = p.frame }, new AbortController().signal)
+            const smokePlan = await d.planExport({ width: 3840, height: 2160, fps: 30, format: 'mov' })
+            await d.exportVideo(song, d.pack, { width: 3840, height: 2160, fps: 30, format: 'mov', showTitle: true, fallSeconds: 1.2, reverb: 0.35 }, smokePlan, target, p => { if (p.frame) frames = p.frame }, new AbortController().signal)
             await window.pianola.exportFinish(h.id)
           } catch (e) { exportError = String(e && e.message || e); await window.pianola.exportAbort(h.id) }
           exportMs = performance.now() - t

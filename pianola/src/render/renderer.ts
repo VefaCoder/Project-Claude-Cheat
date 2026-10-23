@@ -4,17 +4,23 @@ import { isBlackKey, type Song, type SongNote } from '../song/song.ts'
 type Ctx = CanvasRenderingContext2D | OffscreenCanvasRenderingContext2D
 
 export interface RenderOptions {
-  fallSeconds: number // time a note needs from the top edge to the keys
+  fallSeconds: number // time a note needs from the top edge to the keys (at 16:9)
+  range?: [number, number] // visible keys, default all 88
   title?: { text: string; sub: string; alpha: number } | null
 }
 
 interface Palette { base: string; light: string; dark: string; glow: string; rgb: [number, number, number] }
 interface Layout {
   W: number; H: number; s: number
+  lo: number; hi: number
   ww: number; bw: number
   keysTop: number; hitY: number; kbH: number; blackH: number
   x: Float64Array; w: Float64Array
 }
+
+// Height of the note area measured in white-key widths for a 16:9 frame; keeps bar proportions identical
+// across sizes and aspect ratios (portrait simply shows more of the future).
+const FALL_KEYS = 23.3
 
 const FIRST = 21
 const LAST = 108
@@ -48,17 +54,20 @@ function h01(a: number, b: number): number {
   return (x >>> 0) / 4294967296
 }
 
-export function computeLayout(W: number, H: number): Layout {
-  const s = Math.min(W, (H * 16) / 9) / 1920
-  const ww = W / 52
+export function computeLayout(W: number, H: number, range: [number, number] = [FIRST, LAST]): Layout {
+  const [lo, hi] = range
+  const s = Math.min(W, H) / 1080
+  let whites = 0
+  for (let k = lo; k <= hi; k++) if (!isBlackKey(k)) whites++
+  const ww = W / whites
   const kbH = Math.min(H * 0.25, ww * 5.7)
   const felt = Math.max(2, kbH * 0.045)
   const keysTop = H - kbH
-  const x = new Float64Array(128)
+  const x = new Float64Array(128).fill(-1e6)
   const w = new Float64Array(128)
   const bw = ww * 0.58
   let wi = 0
-  for (let k = FIRST; k <= LAST; k++) {
+  for (let k = lo; k <= hi; k++) {
     if (isBlackKey(k)) {
       const c = wi * ww + BLACK_OFFSET[k % 12] * ww
       x[k] = c - bw / 2
@@ -69,16 +78,45 @@ export function computeLayout(W: number, H: number): Layout {
       wi++
     }
   }
-  return { W, H, s, ww, bw, keysTop, hitY: keysTop - felt, kbH, blackH: kbH * 0.63, x, w }
+  return { W, H, s, lo, hi, ww, bw, keysTop, hitY: keysTop - felt, kbH, blackH: kbH * 0.63, x, w }
+}
+
+export function pixelsPerSecond(L: Layout, fallSeconds: number): number {
+  return (L.ww * FALL_KEYS) / fallSeconds
+}
+
+/** Seconds of music visible above the keys. */
+export function visibleSeconds(W: number, H: number, fallSeconds: number, range?: [number, number]): number {
+  const L = computeLayout(W, H, range)
+  return L.hitY / pixelsPerSecond(L, fallSeconds)
+}
+
+/** Key range for narrow (portrait) frames: the notes actually used, widened to whole octaves, at least 3 octaves. */
+export function autoRange(song: Song): [number, number] {
+  if (!song.notes.length) return [48, 84]
+  let lo = 127
+  let hi = 0
+  for (const n of song.notes) { lo = Math.min(lo, n.key); hi = Math.max(hi, n.key) }
+  lo = Math.max(FIRST, lo - (lo % 12)) // down to C
+  hi = Math.min(LAST, hi + ((12 - (hi % 12)) % 12)) // up to C
+  while (hi - lo < 36) {
+    if (lo - 12 >= FIRST) lo -= 12
+    if (hi - lo < 36 && hi + 12 <= LAST) hi += 12
+    if (lo - 12 < FIRST && hi + 12 > LAST) break
+  }
+  if (hi - lo > 64) return [FIRST, LAST]
+  if (isBlackKey(lo)) lo--
+  if (isBlackKey(hi)) hi++
+  return [lo, hi]
 }
 
 /** Key under a canvas point, or -1. Black keys win where they overlap. */
 export function keyAt(L: Layout, px: number, py: number): number {
   if (py < L.keysTop || py > L.H) return -1
   if (py < L.keysTop + L.blackH) {
-    for (let k = FIRST; k <= LAST; k++) if (isBlackKey(k) && px >= L.x[k] && px < L.x[k] + L.w[k]) return k
+    for (let k = L.lo; k <= L.hi; k++) if (isBlackKey(k) && px >= L.x[k] && px < L.x[k] + L.w[k]) return k
   }
-  for (let k = FIRST; k <= LAST; k++) if (!isBlackKey(k) && px >= L.x[k] && px < L.x[k] + L.w[k]) return k
+  for (let k = L.lo; k <= L.hi; k++) if (!isBlackKey(k) && px >= L.x[k] && px < L.x[k] + L.w[k]) return k
   return -1
 }
 
@@ -91,6 +129,22 @@ function roundRect(ctx: Ctx, x: number, y: number, w: number, h: number, r: numb
   ctx.arcTo(x, y + h, x, y, r)
   ctx.arcTo(x, y, x + w, y, r)
   ctx.closePath()
+}
+
+// Static noise tile, about one 8-bit step: breaks up banding of the dark gradient after video compression.
+let noiseTile: OffscreenCanvas | null = null
+function noise(): OffscreenCanvas {
+  if (noiseTile) return noiseTile
+  const c = new OffscreenCanvas(128, 128)
+  const g = c.getContext('2d')!
+  const img = g.createImageData(128, 128)
+  for (let i = 0; i < img.data.length; i += 4) {
+    img.data[i] = img.data[i + 1] = img.data[i + 2] = 255
+    img.data[i + 3] = Math.floor(h01(i, 7) * 3)
+  }
+  g.putImageData(img, 0, 0)
+  noiseTile = c
+  return c
 }
 
 export class PianoRenderer {
@@ -115,12 +169,12 @@ export class PianoRenderer {
   }
 
   draw(ctx: Ctx, W: number, H: number, t: number, opts: RenderOptions) {
-    const L = computeLayout(W, H)
+    const L = computeLayout(W, H, opts.range)
     const pressed = new Map<number, Palette>(this.live)
     const active: { n: SongNote; i: number }[] = []
 
     this.background(ctx, L)
-    const pps = L.hitY / opts.fallSeconds
+    const pps = pixelsPerSecond(L, opts.fallSeconds)
     if (this.song) this.barLines(ctx, L, t, pps)
 
     // visible notes: start within the window, or still sounding
@@ -129,11 +183,11 @@ export class PianoRenderer {
     let i0 = 0
     let hi = notes.length
     while (i0 < hi) { const m = (i0 + hi) >> 1; if (notes[m].start < lo) i0 = m + 1; else hi = m }
-    const tEnd = t + opts.fallSeconds + 0.1
+    const tEnd = t + L.hitY / pps + 0.1
     const visible: number[] = []
     for (let i = i0; i < notes.length && notes[i].start <= tEnd; i++) {
       const n = notes[i]
-      if (n.start + n.dur < t) continue
+      if (n.start + n.dur < t || n.key < L.lo || n.key > L.hi) continue
       visible.push(i)
       if (n.start <= t) {
         active.push({ n, i })
@@ -165,14 +219,16 @@ export class PianoRenderer {
     g.addColorStop(1, '#0d1120')
     ctx.fillStyle = g
     ctx.fillRect(0, 0, L.W, L.hitY)
+    const pattern = ctx.createPattern(noise(), 'repeat')
+    if (pattern) {
+      ctx.fillStyle = pattern
+      ctx.fillRect(0, 0, L.W, L.hitY)
+    }
     // octave and E/F guide lines
     ctx.fillStyle = 'rgba(255,255,255,0.055)'
-    for (let k = FIRST; k <= LAST; k++) {
-      const pc = k % 12
-      if (pc === 0) ctx.fillRect(Math.round(L.x[k]), 0, Math.max(1, L.s), L.hitY)
-    }
+    for (let k = L.lo; k <= L.hi; k++) if (k % 12 === 0) ctx.fillRect(Math.round(L.x[k]), 0, Math.max(1, L.s), L.hitY)
     ctx.fillStyle = 'rgba(255,255,255,0.025)'
-    for (let k = FIRST; k <= LAST; k++) if (k % 12 === 5) ctx.fillRect(Math.round(L.x[k]), 0, Math.max(1, L.s), L.hitY)
+    for (let k = L.lo; k <= L.hi; k++) if (k % 12 === 5) ctx.fillRect(Math.round(L.x[k]), 0, Math.max(1, L.s), L.hitY)
   }
 
   private barLines(ctx: Ctx, L: Layout, t: number, pps: number) {
@@ -225,7 +281,7 @@ export class PianoRenderer {
     const s = L.s
     for (const { n } of active) {
       const pal = this.pals[n.voice]
-      if (!pal) continue
+      if (!pal || n.key < L.lo || n.key > L.hi) continue
       const cx = L.x[n.key] + L.w[n.key] / 2
       const fresh = Math.max(0, 1 - (t - n.start) / 0.35)
       // light column rising from the key
@@ -266,7 +322,7 @@ export class PianoRenderer {
 
   private sparks(ctx: Ctx, L: Layout, t: number, n: SongNote, idx: number, rate: number) {
     const pal = this.pals[n.voice]
-    if (!pal) return
+    if (!pal || n.key < L.lo || n.key > L.hi) return
     const s = L.s
     const cx = L.x[n.key] + L.w[n.key] / 2
     const end = Math.min(n.start + n.dur, t)
@@ -311,7 +367,7 @@ export class PianoRenderer {
     whiteG.addColorStop(0.9, '#fbfbf8')
     whiteG.addColorStop(1, '#d6d6d0')
     const r = Math.min(L.ww * 0.12, 5 * s)
-    for (let k = FIRST; k <= LAST; k++) {
+    for (let k = L.lo; k <= L.hi; k++) {
       if (isBlackKey(k)) continue
       const x = L.x[k] + 0.5 * s
       const w = L.w[k] - 1.2 * s
@@ -337,7 +393,7 @@ export class PianoRenderer {
     blackG.addColorStop(0, '#0b0b0d')
     blackG.addColorStop(0.75, '#2a2a30')
     blackG.addColorStop(1, '#141417')
-    for (let k = FIRST; k <= LAST; k++) {
+    for (let k = L.lo; k <= L.hi; k++) {
       if (!isBlackKey(k)) continue
       const x = L.x[k]
       const w = L.w[k]

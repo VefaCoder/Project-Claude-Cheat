@@ -336,7 +336,7 @@ async function updateExportSummary() {
     return
   }
   start.disabled = !engine.ready || !song.notes.length
-  const length = exportTiming(song, s.fallSeconds).total
+  const length = exportTiming(song, s).total
   const codec = plan.videoCodec === 'hevc' ? 'HEVC (H.265)' : 'H.264'
   const audio = plan.audioCodec === 'pcm-s24' ? 'PCM 24 Bit / 48 kHz, unkomprimiert' : 'AAC 320 kbit/s'
   const mbit = Math.round(plan.videoBitrate / 1e6)
