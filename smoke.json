@@ -1,0 +1,22 @@
+{
+ "ok": true,
+ "loadMs": 7365,
+ "plans": {
+  "mov": {
+   "videoCodec": "hevc",
+   "videoBitrate": 49766400,
+   "audioCodec": "pcm-s24"
+  },
+  "mp4": {
+   "videoCodec": "avc",
+   "videoBitrate": 79626240,
+   "audioCodec": "aac"
+  }
+ },
+ "exportMs": 66071.155,
+ "exportError": null,
+ "frames": 213,
+ "renderMsPerFrame": 5.3344166666664625,
+ "notes": 193,
+ "status": "193 Noten · 0:42 · 2 Stimmen"
+}
