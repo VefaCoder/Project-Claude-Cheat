@@ -93,6 +93,7 @@ main { flex: 1; display: flex; min-height: 0; }
   width: 40%; min-width: 300px; max-width: 70%;
   display: flex; flex-direction: column;
   background: var(--panel);
+  container-type: inline-size;
 }
 .splitter { width: 1px; background: var(--line); position: relative; cursor: col-resize; flex: none; }
 .splitter::after { content: ""; position: absolute; inset: 0 -4px; }
@@ -152,6 +153,16 @@ main { flex: 1; display: flex; min-height: 0; }
 .status.warn .dot { background: var(--warn); box-shadow: 0 0 10px rgba(255, 181, 71, .5); }
 .status.busy .dot { background: var(--accent); animation: pulse 1s infinite; }
 @keyframes pulse { 50% { opacity: .35; } }
+
+/* narrow editor: drop the label first, then button texts */
+@container (max-width: 500px) {
+  .pane-title { display: none; }
+  .pane-head { justify-content: flex-end; }
+}
+@container (max-width: 400px) {
+  #btnExamples span, .btn.run kbd { display: none; }
+  #btnExamples { width: 28px; padding: 0; }
+}
 
 /* ------------------------------------------------ transport */
 .transport {
