@@ -171,3 +171,11 @@ test('out of range notes are dropped with a warning', () => {
   assert.equal(s.notes.length, 1)
   assert.equal(s.warnings.length, 2)
 })
+
+test('large generated pieces compile quickly', () => {
+  const t0 = performance.now()
+  const s = ok(`tempo(200); const v = voice("a")
+    for (let i = 0; i < 2000; i++) v.play("C4/32 E4 G4 C5 [C3 G3]/16 r/16 " + (i % 2 ? "ped" : "*"))`)
+  assert.equal(s.notes.length, 12000)
+  assert.ok(performance.now() - t0 < 3000)
+})

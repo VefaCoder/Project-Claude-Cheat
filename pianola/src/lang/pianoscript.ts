@@ -612,7 +612,9 @@ function finish(rt: Runtime): Song {
     }
   }
 
-  const endBeat = Math.max(0, ...raw.map(r => r.start + r.dur), ...rt.voices.map(v => v.cursor))
+  let endBeat = 0
+  for (const r of raw) endBeat = Math.max(endBeat, r.start + r.dur)
+  for (const v of rt.voices) endBeat = Math.max(endBeat, v.cursor)
   const bars = barBeats(rt.meterList(), rt.pickupBeats, endBeat).map(b => tm.toSeconds(b))
 
   // Hand and color: explicit options win, otherwise the average pitch decides.
