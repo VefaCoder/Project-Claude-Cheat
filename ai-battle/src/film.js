@@ -52,8 +52,8 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     [16.45, [-7, 0, -2], 'out3'], [16.52, [-7, 0, -2]], [16.75, [-4, 0, 1.5], 'out3'], [16.85, [-4, 0, 1.5]],
     [17.05, [-2.8, 2.2, 0], 'out2'], [17.25, [-1.5, 0, -1.5], 'in2'], [17.3, [-1.5, 0, -1.5]], [17.5, [-4.5, 0, -4], 'out3'], [17.55, [-4.5, 0, -4]],
     [18.0, [-5.6, 0, -3.0], 'out2'], [18.02, [-5.6, 0, -3]], [18.2, [-6.5, 0, 0.5], 'out3'], [18.3, [-6.5, 0, 0.5]], [18.5, [-6.5, 3.3, 0.5], 'out2'], [18.75, [-6.3, 4.6, 0.7], 'out2'], [18.82, [-6.3, 4.6, 0.7]],
-    [19.3, [-5, 0, 2], 'in2'], [19.45, [-4.6, 0.5, 2.15], 'out2'], [19.62, [-4.2, 0, 2.3], 'in2'], [22.0, [-4.2, 0, 2.3]],
-    [22.15, [-4.6, 3.0, 2.0], 'out3'], [22.3, [-2.0, 3.25, 0.4], 'io2'], [22.42, [-2.0, 3.8, 0.4], 'out2'], [22.9, [0.0, 4.5, 0.6], 'out2'], [23.15, [0.5, 3.4, 0.8], 'io2'], [23.38, [0.2, 0, 0.8], 'in2'], [23.5, [0.2, 0, 0.8]],
+    [19.3, [-5, 0, 1.3], 'in2'], [19.45, [-4.7, 0.5, 1.4], 'out2'], [19.62, [-4.25, 0, 1.47], 'in2'], [22.0, [-4.25, 0, 1.47]],
+    [22.15, [-4.6, 3.0, 1.3], 'out3'], [22.3, [-2.0, 3.25, 0.4], 'io2'], [22.42, [-2.0, 3.8, 0.4], 'out2'], [22.9, [0.0, 4.5, 0.6], 'out2'], [23.15, [0.5, 3.4, 0.8], 'io2'], [23.38, [0.2, 0, 0.8], 'in2'], [23.5, [0.2, 0, 0.8]],
     [23.85, [2.0, 2.4, 0.7], 'out2'], [24.05, [2.2, 0.25, 0.65], 'in3'], [24.2, [2.0, 0, 0.7], 'out2'], [24.3, [2.0, 0, 0.7]], [24.62, [0.5, 0, 0.5], 'io2'], [25.45, [0.5, 0, 0.5]],
     [25.8, [6.6, 0.25, 0.3], 'in2'], [26.0, [7.0, 0, 0.3], 'out3'], [26.6, [7.0, 0, 0.3]], [27.4, [2.0, 0, 0], 'io3'], [27.74, [2.0, 0, 0]], [27.9, [1.6, 0, -0.4], 'out3'],
     [28.42, [1.6, 0, -0.4]], [28.56, [-0.6, 0, -1.2], 'out3'], [28.75, [-0.6, 0, -1.2]], [29.5, [-7.5, 1.6, 0], 'io3'], [33.9, [-7.5, 1.6, 0]], [34.4, [-8.6, 1.5, 0], 'in2'],
@@ -86,7 +86,7 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     cx: [[0, 'fierce'], [1.3, 'focus'], [3.8, 'neutral'], [5.2, 'focus'], [6.0, 'neutral'], [10.06, 'hurt'], [10.4, 'focus'], [11.0, 'line'], [13.0, 'fierce'], [13.6, 'calm'], [15.3, 'focus'], [20.0, 'calm'], [22.6, 'wide'], [23.18, 'hurt'], [24.4, 'focus'], [25.3, 'line'], [25.83, 'hurt'], [26.9, 'line'], [28.62, 'wide'], [28.8, 'line'], [29.4, 'fierce'], [34.42, 'closed'], [35.4, 'hurt'], [35.9, 'calm'], [36.6, 'fierce']] };
   const moodAt = (list, s) => { let m = list[0][1]; for (const [t, n] of list) { if (t <= s) m = n; else break; } return m; };
   const faceMove = { cl: [[16.22, 18.2], [22.0, 23.3]], cx: [] };
-  const nods = { cx: new Track([[0, 0], [36.0, 0], [36.15, 0.3, 'io2'], [36.35, 0, 'io2']]), cl: new Track([[0, 0], [36.2, 0], [36.4, 0.22, 'io2'], [36.8, 0, 'io2']]) };
+  const nods = { cx: new Track([[0, 0], [36.0, 0], [36.15, 0.3, 'io2'], [36.35, 0, 'io2']]), cl: new Track([[0, 0], [21.15, 0], [21.38, -0.7, 'io2'], [21.9, -0.7], [22.02, 0, 'io2'], [36.2, 0], [36.4, 0.22, 'io2'], [36.8, 0, 'io2']]) };
 
   /* ---------------------------------------------------------------- hand clips */
   const POSE = {
@@ -141,6 +141,8 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     { s: 27.71, d: 0.05, type: 'swing', a0: 100, a1: -70, tilt: 5 }, { s: 27.93, d: 0.05, type: 'swing', a0: -100, a1: 70, tilt: 10 }, { s: 28.15, d: 0.05, type: 'swing', a0: 100, a1: -70, tilt: -5 }, { s: 28.37, d: 0.05, type: 'swing', a0: -100, a1: 70, tilt: 8 }, { s: 28.58, d: 0.04, type: 'thrust', hold: 0.1 },
     { s: 28.66, type: 'guard' }, { s: 29.12, type: 'windup' }, { s: 29.22, d: 0.16, type: 'swing', a0: 160, a1: -200, tilt: 8, hold: 0.1 }, { s: 29.6, type: 'charge' }, { s: 34.42, type: 'hit' }, { s: 34.9, type: 'down' }, { s: 35.6, type: 'guard' }, { s: 36.6, type: 'charge' }, { s: 36.9, type: 'windup' }, { s: 37.18, d: 0.12, type: 'thrust2' },
   ];
+  const ATK = { swing: 1, thrust: 1, thrust2: 1, hammerDown: 1, strikeDown: 1 };
+  const attacking = (clips, s) => { let c = clips[0]; for (const k of clips) { if (k.s <= s) c = k; else break; } return !!ATK[c.type] && s < c.s + (c.d || 0.12) + 0.14; };
   const clipPose = (kind, clips, s) => {
     let c = clips[0]; for (const k of clips) { if (k.s <= s) c = k; else break; }
     let type = c.type, u = c.d ? clamp((s - c.s) / c.d) : 1;
@@ -279,15 +281,15 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
   at(18.3, () => { fx.impact(V(-6.5, 0.6, 0.5), CYAN, 1.1); cl.hit = 0.6; }); cue(18.3, 'hit', { x: -0.6 });
   at(18.8, () => { const p = cl.chestWorld(); hitChar(cl, p, CYAN, 2.2); fx.ring(p, { col: ICE, r0: 0.3, r1: 7, life: 0.6, width: 0.08 }); weaponBurst(cl, 'R', GOLD); cl.setWeapon('R', 'none'); fx.punch(0.08); });
   cue(18.8, 'hit_big', { x: -0.55 }); cue(18.82, 'weapon_break', { x: -0.55 });
-  at(19.3, () => { fx.sparks(V(-5, 0.05, 2), 60, { col: hdr(0.9, 0.9, 1), speed: 7, flat: 0.2, life: 0.6, size: 0.02 }); fx.floorRing(-5, 2, { col: hdr(0.9, 0.8, 0.7), speed: 12, life: 0.8, k: 1.4 }); fx.shake(0.12); });
+  at(19.3, () => { fx.sparks(V(-5, 0.05, 1.3), 60, { col: hdr(0.9, 0.9, 1), speed: 7, flat: 0.2, life: 0.6, size: 0.02 }); fx.floorRing(-5, 1.3, { col: hdr(0.9, 0.8, 0.7), speed: 12, life: 0.8, k: 1.4 }); fx.shake(0.12); });
   cue(19.3, 'land_hard', { x: -0.45 }); cue(19.9, 'descend', { x: 0.2 }); cue(21.0, 'target_all', { x: 0 });
   [0, 1, 2, 6].forEach((ti) => during(20.8, 21.55, (u, s) => { const T = arena.terminals[ti]; const b = cl.chestWorld(); T.m.lookAt(b); fx.beam(T.m.position, b, CYAN, 0.012, 0.25 + 0.3 * u + 0.2 * Math.sin(s * 60 + ti), { core: 0 }); }));
 
   /* ---------------------------------------------------------------- F: planning */
   cue(21.4, 'breath', { x: -0.3 }); cue(21.55, 'plan_in', {}); cue(22.0, 'plan_out', {});
   const pathPts = [
-    [V(-4.2, 0.9, 2.3), V(-3.2, 1.0, 2.2), V(-2.2, 1.2, 1.9), V(-1.4, 1.35, 1.6)],
-    [V(-4.2, 0.9, 2.3), V(-4.6, 2.6, 3.0), V(-4.0, 4.0, 3.9), V(-2.8, 4.3, 4.3)],
+    [V(-4.25, 0.9, 1.47), V(-3.2, 1.0, 1.5), V(-2.2, 1.2, 1.4), V(-1.4, 1.35, 1.3)],
+    [V(-4.25, 0.9, 1.47), V(-4.6, 2.6, 2.4), V(-4.0, 4.0, 3.4), V(-2.8, 4.3, 3.9)],
     (() => { const o = []; for (let i = 0; i <= 14; i++) { const p = clPos.at(22.0 + i * (1.38 / 14)); o.push(V(p[0], p[1] + 0.9, p[2])); } return o; })(),
   ];
   const pathCurves = [];
@@ -309,8 +311,8 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
   at(22.13, () => { paths.forEach((p) => p.hide()); ghosts.plan.forEach((g) => g.hide()); });
   // execution of the plan
   cue(22.0, 'dash_c', { x: -0.35 });
-  [0, 1, 2, 6].forEach((ti) => tb(ti, 22.0, 22.08, 22.3, () => V(-4.2, 0.9, 2.3)));
-  at(22.2, () => { const p = V(-4.2, 1.0, 2.3); fx.impact(p, CYAN, 2.0); fx.shards(p, 50, { col: hdr(0.3, 1.0, 1.4), speed: 11, size: 0.2, life: 1.3, radius: 1.5 }); fx.ring(p, { col: CYAN, r0: 0.4, r1: 6, life: 0.5, floor: true }); }); cue(22.2, 'explode', { x: -0.4 });
+  [0, 1, 2, 6].forEach((ti) => tb(ti, 22.0, 22.08, 22.3, () => V(-4.25, 0.9, 1.47)));
+  at(22.2, () => { const p = V(-4.25, 1.0, 1.47); fx.impact(p, CYAN, 2.0); fx.shards(p, 50, { col: hdr(0.3, 1.0, 1.4), speed: 11, size: 0.2, life: 1.3, radius: 1.5 }); fx.ring(p, { col: CYAN, r0: 0.4, r1: 6, life: 0.5, floor: true }); }); cue(22.2, 'explode', { x: -0.4 });
   at(22.36, () => { fx.impact(V(-2, 3.3, 0.4), GOLD, 0.8, { floor: false }); }); cue(22.36, 'spring', { x: -0.2 });
   const mirrorWin = (k0, f0, f1, k1, ti, tgt, onHit) => {
     const src = arena.terminals[ti].home; let mp = V(), mn = V();
@@ -337,7 +339,7 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
   const [dbx, dbz] = hexCenter(-1.0, -2.6); const chunkPos = (s, out = new THREE.Vector3()) => {
     if (s < 25.05) return out.set(dbx, 0.75, dbz);
     const c = V(0.5, 1.0, 0.5);
-    if (s < 25.4) { const u = E.in2(clamp((s - 25.05) / 0.35)) * 0.6 + clamp((s - 25.05) / 0.35) * 0.4; const a0 = Math.atan2(dbz - c.z, dbx - c.x), a = a0 - u * (a0 + TAU > TAU ? a0 : a0 + TAU); const r = lerp(Math.hypot(dbx - c.x, dbz - c.z), 3.2, u); return out.set(c.x + Math.cos(a) * r, lerp(0.75, 1.0, u) + Math.sin(u * P) * 0.9, c.z + Math.sin(a) * r); }
+    if (s < 25.4) { const u = E.in2(clamp((s - 25.05) / 0.35)) * 0.6 + clamp((s - 25.05) / 0.35) * 0.4; const a0 = Math.atan2(dbz - c.z, dbx - c.x), a = a0 - u * (a0 + TAU > TAU ? a0 : a0 + TAU); const r = lerp(Math.hypot(dbx - c.x, dbz - c.z), 2.6, u); return out.set(c.x + Math.cos(a) * r, lerp(0.75, 1.0, u) + Math.sin(u * P) * 0.9, c.z + Math.sin(a) * r); }
     const rel = chunkPos(25.3999); return out.lerpVectors(rel, V(7.1, 1.0, 0.3), clamp((s - 25.4) / 0.34));
   };
   during(24.84, 25.52, (u, s) => { const h = cl.weaponPoint('R', 'tip'); const tgt = s < 25.05 ? V(dbx, 1.45, dbz) : chunkPos(Math.min(s, 25.4)); const ext = s < 25.05 ? E.out3(clamp((s - 24.84) / 0.17)) : s > 25.4 ? 1 - clamp((s - 25.4) / 0.12) : 1;
@@ -451,16 +453,16 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     [17.3, (u) => [V(lerp(-6.2, -6.6, u), 1.7, lerp(2.6, 2.2, u)), V(-2.8, 2.0, -6.5), 46]],
     [18.0, (u) => [V(-6, 2.2, lerp(9.5, 10.5, u)), V(-6.2, lerp(1.2, 3.0, smooth(u * 1.5)), 0.5), 44]],
     [18.82, (u) => [V(-3.2, 0.55, 5.8), V(cl.pos.x, Math.max(0.9, cl.pos.y + 0.6), cl.pos.z), 40]],
-    [19.62, (u) => [V(lerp(-7.0, -6.7, u), 0.42, lerp(4.3, 4.0, u)), V(-2.2, 1.25, 1.7), 36]],
-    [20.3, (u) => [V(-4.2, lerp(7, 8.6, u), lerp(8.5, 9.6, u)), V(-3.4, 0.9, 1.8), 38]],
-    [21.38, (u) => [V(-2.75, 1.5, 3.9), V(-4.2, 1.5, 2.3), 15]],
-    [21.55, (u) => [L3(V(-7.2, 4.6, 8.6), V(-5.6, 6.0, 10.2), u), V(-1.9, 1.9, 1.8), 40]],
+    [19.62, (u) => [V(lerp(-7.0, -6.7, u), 0.42, lerp(3.7, 3.4, u)), V(-2.2, 1.25, 1.2), 36]],
+    [20.3, (u) => [V(-4.2, lerp(7, 8.6, u), lerp(8.0, 9.0, u)), V(-3.4, 0.9, 1.2), 38]],
+    [21.38, (u) => [V(lerp(-3.2, -3.3, u), 5.0, lerp(2.95, 2.8, u)), V(-4.23, 1.5, 1.47), 20]],
+    [21.55, (u) => [L3(V(-7.2, 4.6, 8.0), V(-5.6, 6.0, 9.6), u), V(-1.9, 1.9, 1.4), 40]],
     [22.0, (u) => [V(-8.6, 3.4, 8.6), V(cl.pos.x, cl.pos.y + 0.9, cl.pos.z), 44]],
     [22.45, (u) => [V(lerp(-3.5, -2.0, u), 2.6, 11.5), V(lerp(0, 1.5, u), 3.6, -2.0), 46]],
     [23.26, (u) => [V(3.6, 1.1, 5.0), V(cx.pos.x - 0.6, cx.pos.y + 1.0, cx.pos.z), 38]],
     [23.52, (u) => [V(4.9, 0.45, 4.0), V(2.4, lerp(1.2, 1.9, u), 0.6), 42]],
     [24.05, (u) => [V(lerp(3.2, 4.2, E.out3(u)), 1.4, lerp(7.5, 9, E.out3(u))), V(lerp(3, 4.5, E.out3(u)), 1.0, 0.4), 40]],
-    [24.7, (u) => [V(lerp(1.8, 2.4, u), 2.7, 7.4), V(lerp(0.6, 2.0, u), 1.2, -0.6), 44]],
+    [24.7, (u) => [V(lerp(1.8, 2.4, u), 3.0, 8.8), V(lerp(0.6, 2.0, u), 1.2, -0.6), 42]],
     [25.4, (u) => { const c = chunkPos(Math.min(ctx.s, 25.74)); return [V(c.x - 4.6, 2.3, 4.2), V(c.x + 2.2, 1.0, 0.2), 40]; }],
     [25.74, (u) => [V(lerp(5.9, 5.6, u), 1.3, 6.2), V(7.4, 1.1, 0.3), 34]],
     [25.83, (u) => [V(8.6, 1.7, 10.5), V(lerp(8, 10.5, E.out2(u)), 1.0, -0.2), 40]],
@@ -502,7 +504,7 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
       lean: [(key === 'cl' ? clLean : cxLean).at(s), 0], flare: (key === 'cl' ? clFlare : cxFlare).at(s), haloSpin: (key === 'cl' ? clHaloSpin : cxHaloSpin).at(s), nod: nods[key].at(s) });
   }
 
-  let prevS = -1;
+  let prevS = -1; const Tdet = s2T(34.4);
   function step(frame, willRender) {
     const s = ST[frame], ds = frame === 0 ? 0 : s - ST[frame - 1], T = frame / 60; ctx = { s, ds, T };
     fx.begin();
@@ -516,7 +518,7 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     scan.update(s);
     // trails
     const tr = (name, m, side) => { const t = trails[name]; const tip = m.weaponPoint(side, 'tip'), base = m.weaponPoint(side, 'base'); const sp = ds > 0 ? tip.distanceTo(prevTip[name]) / ds : 0; prevTip[name].copy(tip);
-      if (m.form[side] !== 'none' && m.root.visible && sp > 5 && sp < 400) t.push(base, tip, s); t.mat.uniforms.uOpacity.value = clamp((sp - 5) / 14) * 0.9 + 0.1; t.update(s); };
+      if (m.form[side] !== 'none' && m.root.visible && sp > 8 && sp < 400 && attacking(m === cl ? clClips : cxClips, s)) t.push(base, tip, s); t.mat.uniforms.uOpacity.value = clamp((sp - 8) / 14) * 0.9; t.update(s); };
     tr('clR', cl, 'R'); tr('cxR', cx, 'R'); tr('cxL', cx, 'L');
     { const a = V(0, 0.32, -0.32).applyMatrix4(cl.tilt.matrixWorld), b = V(0, 0.12, -0.34).applyMatrix4(cl.tilt.matrixWorld); if (cl.speed > 3) trails.scarf.push(b, a, s); trails.scarf.mat.uniforms.uOpacity.value = clamp(cl.speed / 12) * 0.7; trails.scarf.update(s); trails.jet.mesh.visible = false; }
     // afterimages
@@ -538,7 +540,7 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
     const plan = smooth((s - 21.5) / 0.06) * (1 - smooth((s - 21.97) / 0.05));
     const scanG = Math.max(smooth((s - 11.0) / 0.4) * (1 - smooth((s - 12.5) / 0.3)) * 0.55, smooth((s - 28.68) / 0.1) * (1 - smooth((s - 29.2) / 0.1)) * 0.5);
     const U = post.u; U.uPlan.value = plan; U.uScan.value = scanG; U.uRadial.value = fx.radial;
-    const white = s >= 34.4 ? Math.max(0, 1 - Math.abs((s - 34.455) / (s < 34.455 ? 0.05 : 0.5))) : 0;
+    const dTw = T - Tdet; const white = dTw < 0 ? 0 : dTw < 0.08 ? dTw / 0.08 : Math.max(0, 1 - (dTw - 0.2) / 0.5);
     const black = s >= 37.3 ? 1 : 0; const fin = clamp(1 - T / 0.12);
     if (black) { U.uFade.value.set(0, 0, 0); U.uFadeK.value = 1; } else if (white > 0) { U.uFade.value.set(1, 0.98, 0.95); U.uFadeK.value = clamp(white * 1.15); } else { U.uFade.value.set(0, 0, 0); U.uFadeK.value = fin * 0.0; }
     U.uExposure.value = 1.0 - plan * 0.12 + (s > 34.5 && s < 36.9 ? -0.12 * (1 - smooth((s - 36.2) / 0.7)) : 0);
