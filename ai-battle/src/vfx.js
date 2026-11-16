@@ -159,7 +159,7 @@ export function buildVfx(scene, arena, camera) {
   }
   let ringI = 0;
   fx.ring = (pos, o = {}) => {
-    const r = rings[ringI++ % rings.length]; r.t = 0; r.life = o.life ?? 0.5; r.r0 = o.r0 ?? 0.2; r.r1 = o.r1 ?? 4; r.k = o.k ?? 1; r.w = o.width ?? 0.14;
+    const r = rings[ringI++ % rings.length]; r.t = 0; r.life = o.life ?? 0.5; r.r0 = o.r0 ?? 0.2; r.r1 = o.r1 ?? 4; r.k = o.k ?? 1; r.w = (o.width ?? 0.14) * 0.6;
     r.mat.uniforms.uColor.value.copy(o.col || PAL.white); r.m.position.copy(pos); r.face = !o.normal && !o.floor;
     if (o.floor) { r.m.rotation.set(-Math.PI / 2, 0, 0); r.m.position.y = Math.max(0.04, pos.y); } else if (o.normal) r.m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), o.normal.clone().normalize());
     r.m.visible = true;

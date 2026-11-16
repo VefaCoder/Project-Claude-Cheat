@@ -38,10 +38,10 @@ export function createFilm({ scene, camera, arena, post, W, H }) {
   const whip = new Tube(scene, hdr(1.9, 0.9, 0.26), { n: 40, m: 6, radius: 0.035 });
   const paths = [0, 1, 2].map(() => new Tube(scene, hdr(1.7, 0.95, 0.3), { n: 70, m: 5, radius: 0.028, dashed: true }));
   // debris chunk (pillar piece hurled by the whip) + its halves
-  const chunkGeo = new THREE.CylinderGeometry(HEXW / Math.sqrt(3) * 0.97, HEXW / Math.sqrt(3) * 0.97, 1.5, 6);
-  const chunkMat = arena.pillars[0].mat.clone(); chunkMat.uniforms.uH.value = 1.5; chunkMat.uniforms.uHeat.value = 0.6;
-  const chunk = new THREE.Mesh(chunkGeo, chunkMat); chunk.visible = false; scene.add(chunk);
-  const halves = [0, 1].map((i) => { const g = new THREE.CylinderGeometry(HEXW / Math.sqrt(3) * 0.97, HEXW / Math.sqrt(3) * 0.97, 1.5, 6, 1, false, i * Math.PI, Math.PI); const hm = chunkMat.clone(); hm.side = THREE.DoubleSide; hm.uniforms.uH.value = 1.5; hm.uniforms.uHeat.value = 1.0; const m = new THREE.Mesh(g, hm); m.visible = false; scene.add(m); return m; });
+  const chunkGeo = new THREE.CylinderGeometry(HEXW / Math.sqrt(3) * 0.97, HEXW / Math.sqrt(3) * 0.97, 1.5, 6); chunkGeo.translate(0, -0.75, 0);
+  const chunkMat = arena.pillars[0].mat.clone(); chunkMat.uniforms.uH.value = 1.0; chunkMat.uniforms.uHeat.value = 0.3;
+  const chunk = new THREE.Group(); { const cm = new THREE.Mesh(chunkGeo, chunkMat); cm.position.y = 0.75; chunk.add(cm); } chunk.visible = false; scene.add(chunk);
+  const halves = [0, 1].map((i) => { const g = new THREE.CylinderGeometry(HEXW / Math.sqrt(3) * 0.97, HEXW / Math.sqrt(3) * 0.97, 1.5, 6, 1, false, i * Math.PI, Math.PI); g.translate(0, -0.75, 0); const hm = chunkMat.clone(); hm.side = THREE.DoubleSide; hm.uniforms.uH.value = 1.0; hm.uniforms.uHeat.value = 0.6; const hmesh = new THREE.Mesh(g, hm); hmesh.position.y = 0.75; const m = new THREE.Group(); m.add(hmesh); m.visible = false; scene.add(m); return m; });
 
   /* ================================================================ choreography data */
   const P = Math.PI;
